@@ -35,6 +35,10 @@ async def disconect_db():
         re.redis.close()
         await re.redis.wait_closed()
 
+@app.get("/")
+async def health_check():
+    return {'OK'}
+
 
 @app.post("/token", description=TOKEN_DESCRIPTION, summary=TOKEN_SUMMARY)
 async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

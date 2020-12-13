@@ -17,7 +17,7 @@ DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 REDIS_URL = f"redis://{DB_HOST}"
 
 TESTING = False
-IS_LOAD_TEST = True
+IS_LOAD_TEST = False
 
 TESTING_DB_HOST = "ec2-18-209-224-77.compute-1.amazonaws.com"
 TESTING_DB_USER = "test"
