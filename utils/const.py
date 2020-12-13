@@ -11,5 +11,18 @@ DB_HOST = "ec2-18-207-230-232.compute-1.amazonaws.com"
 DB_USER = "admin"
 DB_PASSWORD = "admin"
 DB_NAME = "bookstore"
-
 DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+
+
+REDIS_URL = f"redis://{DB_HOST}"
+
+TESTING = False
+IS_LOAD_TEST = True
+
+TESTING_DB_HOST = "ec2-18-209-224-77.compute-1.amazonaws.com"
+TESTING_DB_USER = "test"
+TESTING_DB_PASSWORD = "test"
+TESTING_DB_NAME = "test"
+TESTING_DB_URL = f"postgresql://{TESTING_DB_USER}:{TESTING_DB_PASSWORD}@{TESTING_DB_HOST}/{TESTING_DB_NAME}"
+
+TESTING_REDIS_URL = f"redis://{TESTING_DB_HOST}"

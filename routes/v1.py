@@ -8,11 +8,12 @@ from starlette.responses import Response
 from utils.security import authenticate_user, create_jwt_token
 from utils.db_functions import (db_insert_personel, db_check_personel, db_get_book_with_isbn, db_get_author_name,
                                 db_get_author_from_id,db_patch_author_name)
-
+import pickle
+import utils.redis_object as re
 app_v1 = APIRouter()
 
 
-@app_v1.post("/user/", status_code=HTTP_201_CREATED, tags=["User"])
+@app_v1.post("/user", status_code=HTTP_201_CREATED, tags=["User"])
 async def post_user(user: User):
     await db_insert_personel(user)
     return {"result": "personel has been created"}
@@ -20,8 +21,18 @@ async def post_user(user: User):
 
 @app_v1.get("/login", tags=["User"])
 async def get_user_validation(username: str = Body(...), password: str = Body(...)):
-    result = await db_check_personel(username, password)
-    return {"is_valid": result}
+    redis_key = f"{username},{password}"
+    result = await re.redis.get(redis_key)
+    # redis has data
+    if result:
+        if result == "true":
+            return {"is_valid": True}
+        else:
+            return {"is_valid": False}
+    else:
+        result = await db_check_personel(username, password)
+        await re.redis.set(redis_key, str(result),expire=10)
+        return {"is_valid (db)": result}
 
 
 @app_v1.get("/useless", tags=["User"])
@@ -32,12 +43,18 @@ async def useless():
 @app_v1.get("/book/{isbn}", response_model=Book, response_model_exclude=["author"],
             tags=["Book"])  # response_model_include=["author"]
 async def get_book_with_isbn(isbn: str):
-    book = await db_get_book_with_isbn(isbn)
-    author = await db_get_author_name(book['author'])
-    author_obj = Author(**author)
-    book["author"] = author_obj
-    result_book = Book(**book)
-    return result_book
+    result = await re.redis.get(isbn)
+    if result:
+        result_book = pickle.loads(result)
+        return result_book
+    else:
+        book = await db_get_book_with_isbn(isbn)
+        author = await db_get_author_name(book['author'])
+        author_obj = Author(**author)
+        book["author"] = author_obj
+        result_book = Book(**book)
+        await re.redis.set(isbn, pickle.dumps(result_book))
+        return result_book
 
 
 @app_v1.get("/author/{id}/book", tags=["Book"])

@@ -71,3 +71,4 @@ async def db_patch_author_name(id, name):
     query = """update author set name=:name where id=:id"""
     values = {"id": id, "name": name}
     await execute(query, False, values)
+
